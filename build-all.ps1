@@ -1,111 +1,64 @@
-function Test-CustomBuildScript 
-{
-    param (
-        $Directory
-    );
-
-    return Test-Path $Directory\build-this.ps1;
-}
-
-function Test-DotnetProjectFile 
-{
-    param (
-        $Directory
-    );
-    
-    $NowLocation = (Get-Location).Path;
-    Set-Location $Directory;
-    $Result =  (Test-Path *.csproj) -or (Test-Path *.sln);
-    Set-Location $NowLocation;
-    return $Result;
-}
-
-function Build-Directory {
-    param (
-        $DirectoryName
-    );
-    
-    $ReturnValue = -1;
-    if (Test-DotnetProjectFile $DirectoryName)
-    {
-        $NowLocation = (Get-Location).Path;
-        Set-Location $DirectoryName;
-        $ReturnValue = dotnet msbuild --nologo;
-        Set-Location $NowLocation;
-    }
-    else 
-    {
-        Write-Error -Message "---! Error: Directory `"$DirectoryName`" doesn't contains .NET project file.";
-    }
-    return $ReturnValue;
-}
-
-function Build-CustomDirectory
-{
-    param (
-        $DirectoryName
-    );
-
-    $NowLocation = (Get-Location).Path;
-    Set-Location $DirectoryName;
-    $ReturnValue = ./build-this.ps1;
-    Set-Location $NowLocation;
-    return $ReturnValue;
-}
 
 
-function Build-Topic 
-{
-    param (
-        $TopicName
-    );
-    $NowLocation = (Get-Location).Path;
-    Set-Location $TopicName;
 
-    $SubDirectories = Get-ChildItem -Attributes "directory" | Select-Object -Property Name;
-    $SubDirectoryNames = $SubDirectories.Name;
-    $Index = 1;
-    foreach ($SubDirectory in $SubDirectoryNames)
-    {
-        Write-Output "---- Building item $Index / $($SubDirectories.Length) ...";
-        Build-Directory $SubDirectory;
-        $Index++;
-    }
-    Set-Location $NowLocation;
-}
-
-function Build-Language
-{
-    param (
-        $LanguageName
-    );
-
-    $NowLocation = (Get-Location).Path;
-    Set-Location $LanguageName;
-
-    $TopicList = Get-ChildItem -Attributes "directory" | Select-Object -Property Name;
-    $TopicNameList = $TopicList.Name;
-    $Index = 1;
-    foreach ($Topic in $TopicNameList)
-    {
-        Write-Output "---- Building topic $Index / $($TopicList.Length) ...";
-        Build-Topic $Topic;
-        $Index++;
-    }
-    Set-Location $NowLocation;
-}
 
 function Build-All
 {
-    $LanguageList = Get-ChildItem -Attributes "directory" | Select-Object -Property Name;
-    $LanguageList = $LanguageList.Name;
-    Write-Output "---- Building All Targets ...";
+    param ();
 
-    foreach ($Language in $LanguageList)
+    $language_dir_objects = Get-LanguageDirObjects;
+    $language_dirs = $language_dir_objects.Name;
+
+    $built_language_dirs_count = 0;
+    foreach ($language_dir in $language_dirs)
     {
-        Write-Output "---- Building language `"$Language`" ...";
-        Build-Language $Language;
+        $built_language_dirs_count++;
+        Build-LanguageDir $language_dir $built_language_dirs_count $language_dir_objects.Length;
+
     }
 }
 
+function Get-LanguageDirObjects
+{
+    return (Get-ChildItem -Attributes "directory" | Select-Object -Property "Name");
+}
+
+function Build-LanguageDir
+{
+    param (
+        $language_dir,
+        $built_language_dirs,
+        $total_language_dirs
+    );
+
+    Write-Output "---- Building language `"$language_dir`" ($built_language_dirs / $total_language_dirs)";
+
+    $root = (Get-Location).Path;
+    if (Test-LanguageBuildingScript $language_dir)
+    {
+        Set-Location $language_dir;
+        .\build.ps1;
+        Set-Location $root;
+    }
+    else 
+    {
+        Write-Error -Message "Directory `"$language_dir`" doesn't contain build script";
+    }
+
+    Set-Location $root;
+}
+
+
+function Test-LanguageBuildingScript
+{
+    param (
+        $language_dir
+    );
+    $root = (Get-Location).Path;
+    Set-Location $language_dir;
+    $result = Test-Path -Path "build.ps1";
+    Set-Location $root;
+
+    return $result;
+}
 Build-All;

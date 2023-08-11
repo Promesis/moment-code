@@ -17,7 +17,7 @@ $subdirectories = $subdirectory_objects.Name;
 $count = 1;
 foreach ($topic in $subdirectories)
 {
-    Write-Output "---- Building item `"$item`" ($count / $($subdirectory_objects.Length)) ...";
+    Write-Output "---- Building topic `"$item`" ($count / $($subdirectory_objects.Length)) ...";
     $root = (Get-Location).Path;
     if (Test-TopicBuildingScript $topic)
     {

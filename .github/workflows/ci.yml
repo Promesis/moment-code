@@ -11,7 +11,7 @@ on:
     branches: [ "master" ]
 
 jobs:
-  "Build-C#":
+  "Build-CSharp":
 
     runs-on: ubuntu-latest
 

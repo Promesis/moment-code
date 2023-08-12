@@ -22,7 +22,7 @@ jobs:
       with:
         dotnet-version: 6.0.x
     - name: Build all using PowerShell scripts
-      run: .\build-all.ps1
+      run: pwsh .\build-all.ps1
 
 # # This starter workflow is for a CMake project running on multiple platforms. There is a different starter workflow if you just want a single platform.
 # # See: https://github.com/actions/starter-workflows/blob/main/ci/cmake-single-platform.yml

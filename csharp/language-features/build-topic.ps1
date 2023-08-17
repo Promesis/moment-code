@@ -41,6 +41,7 @@ foreach ($item in $subdirectories)
     elseif (Test-ProjectFileOrSolutionFile $item)
     {
         Set-Location $item;
+        dotnet restore --nologo;
         dotnet msbuild --nologo;
         Set-Location $root;
     }

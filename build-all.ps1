@@ -37,7 +37,7 @@ function Build-LanguageDir
     if (Test-LanguageBuildingScript $language_dir)
     {
         Set-Location $language_dir;
-        .\build.ps1;
+        ./build.ps1;
         Set-Location $root;
     }
     else 

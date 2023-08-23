@@ -22,7 +22,7 @@ foreach ($topic in $subdirectories)
     if (Test-TopicBuildingScript $topic)
     {
         Set-Location $topic;
-        .\build-topic.ps1;
+        ./build-topic.ps1;
         Set-Location $root;
     }
     else 
